@@ -1,111 +1,281 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-  <title>Sensitron AR</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMART 3G-C2 - Responsive</title>
+  
+  <!-- Import del model-viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  
+  <!-- Import del font Open Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" 
+    rel="stylesheet" 
+  />
+  
   <style>
-    :not(:defined) > * {
-      display: none;
+    /* RESET DI BASE */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-
-     html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-      }
+    html, body {
+      height: 100%;
+    }
+    body {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 18px; /* Corpo aumentato */
+      position: relative;
+      min-height: 100vh;
+    }
     
-    model-viewer {
-      background-color: #fff;
-      overflow-x: hidden;
+    /* SFONDO a z-index: -2 */
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      height: 100vh;
-      object-fit: cover
+      height: 100%;
+      z-index: -2;
+      background: linear-gradient(to bottom, #000000, #0E7971);
     }
-
-    #ar-button {
-      background-image: url(assets/ic_view_in_ar_new_googblue_48dp.png);
-      background-repeat: no-repeat;
-      background-size: 20px 20px;
-      background-position: 12px 50%;
-      background-color: #00d5ca;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      bottom: 132px;
-      padding: 0px 16px 0px 40px;
-      font-family: Roboto Regular, Helvetica Neue, sans-serif;
-      font-size: 14px;
-      color: #0076E7;
-      height: 36px;
-      line-height: 36px;
-      border-radius: 5px;
-      border: 1px solid #DADCE0;
+    
+    /* HEADER: logo fisso centrato con banda a sfumatura */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      z-index: 10;
+      background: linear-gradient(to bottom, #000000 50%, rgba(0,0,0,0) 100%);
+      padding: 20px 0;
     }
-
-    #ar-button:active {
-      background-color: #E8EAED;
+    header img {
+      height: 50px;
+      max-width: 100%;
     }
-
-    #ar-button:focus {
+    
+    /* CONTENITORE PRINCIPALE */
+    .main-container {
+      position: relative;
+      z-index: 0;
+      padding-top: 80px;
+      padding-bottom: 50px;
+      min-height: 100vh;
+    }
+    
+    /* TITOLO PRINCIPALE */
+    .title {
+      text-align: center;
+      font-size: 2rem;
+      color: #ffffff;
+      margin: 10px 0 20px 0;
+    }
+    
+    /* GRIGLIA DEI BOTTONI */
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+      padding: 0 10px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+    }
+    
+    /* BOTTONI HEXAGONALI */
+    .hex-button {
+      background: none;
+      border: none;
+      cursor: pointer;
       outline: none;
+      width: 100%;
     }
-
-    #ar-button:focus-visible {
-      outline: 1px solid #4285f4;
+    .hex-button svg {
+      width: 100%;
+      height: auto;
     }
-
-    @keyframes circle {
-      from {
-        transform: translateX(-50%) rotate(0deg) translateX(50px) rotate(0deg);
+    
+    /* Classe per la forma dell'esagono nei bottoni */
+    .hex-shape {
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+    /* Classe per il testo all'interno dell'esagono */
+    .hex-text {
+      text-anchor: middle;
+      dominant-baseline: middle;
+      fill: #fff;
+      font-size: 18px;
+      font-family: "Open Sans", sans-serif;
+    }
+    
+    /* Stato attivo dei bottoni */
+    .hex-button.active svg .hex-shape {
+      fill: #0E7971;
+      stroke: none;
+    }
+    .hex-button.active svg .hex-text {
+      fill: #fff;
+    }
+    
+    /* Effetto hover per desktop: applicato solo su dispositivi con hover */
+    @media (hover: hover) and (pointer: fine) {
+      .hex-button:hover:not(.active) svg .hex-shape {
+        fill: #EAC42C;
+        stroke: none;
       }
-      to {
-        transform: translateX(-50%) rotate(360deg) translateX(50px) rotate(-360deg);
+      .hex-button:hover:not(.active) svg .hex-text {
+        fill: black;
       }
     }
-
-    @keyframes elongate {
-      from {
-        transform: translateX(100px);
-      }
-      to {
-        transform: translateX(-100px);
-      }
+    
+    /* SEZIONE ESAGONO GRANDE e AR CONTAINER */
+    .hex-section {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+      height: 30vh; /* Altezza per l'esperienza AR */
     }
-
-    model-viewer > #ar-prompt {
+    .ar-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    model-viewer {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+    }
+    .big-hex {
       position: absolute;
-      left: 50%;
-      bottom: 175px;
-      animation: elongate 2s infinite ease-in-out alternate;
-      display: none;
-    }
-
-    model-viewer[ar-status="session-started"] > #ar-prompt {
-      display: block;
-    }
-
-    model-viewer > #ar-prompt > img {
-      animation: circle 4s linear infinite;
-    }
-
-    model-viewer > #ar-failure {
-      position: absolute;
+      top: 0;
       left: 50%;
       transform: translateX(-50%);
-      bottom: 175px;
-      display: none;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
     }
-
-    model-viewer[ar-tracking="not-tracking"] > #ar-failure {
+    .big-hex polygon {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.2);
+      stroke-width: 2;
+    }
+    
+    /* SEZIONI DI CONTENUTO */
+    .content-section {
+      display: none;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+      margin-top: 20px;
+      padding: 0 10px;
+      color: #ffffff;
+    }
+    .content-section h2 {
+      margin-bottom: 10px;
+    }
+    
+    /* Classe per i titoli delle sezioni */
+    .section-title {
+      font-size: 1.5rem;
+      color: #ffffff;
+    }
+    
+    /* Classe per i testi delle sezioni */
+    .section-text {
+      font-size: 16px;
+      line-height: 1.4;
+      color: #ffffff;
+    }
+    /* Classe per il testo evidenziato in bold e verde */
+    .section-highlight {
+      font-size: 16px;
+      line-height: 1.4;
+      color: #0E7971;
+      font-weight: bold;
+      margin-top: 1em;
+    }
+    
+    .active {
       display: block;
     }
+    
+    /* Nuova classe per bullet esagonali nell'elenco */
+    .hex-bullet {
+      list-style: none;
+      padding-left: 0;
+      margin: 0 auto;
+      max-width: 500px;
+      text-align: left;
+    }
+    .hex-bullet li {
+      position: relative;
+      margin-bottom: 10px;
+      padding-left: 1.8em;
+      line-height: 1.4;
+    }
+    .hex-bullet li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.35em;
+      width: 12px;
+      height: 12px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><polygon points='6,0 11.2,3 11.2,9 6,12 0.8,9 0.8,3' fill='none' stroke='%23fff' stroke-width='1'/></svg>");
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    
+    /* Nuova classe per l'aspetto dei link */
+    .custom-link {
+      color: #ffffff;
+      text-decoration: underline;
+      font-family: "Open Sans", sans-serif;
+    }
+    .custom-link:visited {
+      color: #0E7971;
+    }
+    
+    /* Nuova classe per il bottone AR */
+    .ar-activation {
+      position: absolute;
+      bottom: 10px; /* Posizionato più in basso */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;  /* Più piccolo */
+      height: 40px;  /* Più piccolo */
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      z-index: 3;
+    }
+    .ar-activation svg {
+      width: 100%;
+      height: 100%;
+    }
+    .ar-activation .hex-shape {
+      fill: #0E7971 !important; /* Sfondo verde */
+      stroke: none !important;
+    }
+    .ar-activation .hex-text {
+      fill: #fff !important;
+      font-size: 14px; /* Leggermente più piccolo */
+      font-family: "Open Sans", sans-serif;
+    }
 
-    #animate-button {
+    #animate-button { /* BOTTONE ESPLOSO */
       background-image: url(assets/esploso.png);
       background-repeat: no-repeat;
       background-size: 20px 20px;
@@ -130,44 +300,200 @@
       background-color: #00d5ca;
     }
     
+    /* MEDIA QUERIES */
+    @media (max-width: 768px) {
+      .title {
+        font-size: 1.8rem;
+      }
+      header img {
+        height: 45px;
+      }
+      .big-hex {
+        width: 250px;
+      }
+    }
+    @media (max-width: 480px) {
+      .title {
+        font-size: 1.5rem;
+      }
+      header img {
+        height: 40px;
+      }
+      .big-hex {
+        width: 200px;
+      }
+    }
   </style>
 </head>
 <body>
-
-  <model-viewer 
-    id="sens"
-    src="full.glb" 
-    poster="assets/sensitron.jpg"
-    tone-mapping="neutral" 
-    shadow-intensity="1" 
-    ar 
-    ar-modes="webxr"
-    camera-controls 
-    touch-action="pan-y" 
-    alt="3G-C2 Sensor"
-    >
-    
-    <button slot="ar-button" id="ar-button">
-      View in your space
-    </button>
-
-    <div id="ar-prompt">
-      <img src="assets/hand.png" alt="Hand gesture to interact with AR">
-    </div>
-
-    <button id="ar-failure" role="alert" aria-live="assertive">
-      AR is not tracking!
-    </button>
-
-    <button id="animate-button">
-    Explode
-  </button> <!-- Messo fuori dal model-viewer per visibilità -->
-    
-  </model-viewer>
+  <!-- SFONDO -->
+  <div class="background"></div>
   
-   
+  <!-- HEADER -->
+  <header>
+    <img src="assets/logo_sensitron_web.svg" alt="Logo Sensitron" />
+  </header>
+  
+  <!-- CONTENITORE PRINCIPALE -->
+  <div class="main-container">
+    <!-- TITOLO PRINCIPALE -->
+    <h1 class="title">SMART 3G-C2</h1>
+    
+    <!-- BOTTONI (tabs) in griglia 2x2 -->
+    <div class="tabs">
+      <button class="hex-button" onclick="toggleSection('descrizione', this)">
+        <svg viewBox="-10 0 220 60">
+          <polygon class="hex-shape" points="10,4 190,4 200,30 190,56 10,56 0,30" />
+          <text class="hex-text" x="100" y="30">Descrizione</text>
+        </svg>
+      </button>
+      
+      <button class="hex-button" onclick="toggleSection('specifiche', this)">
+        <svg viewBox="-10 0 220 60">
+          <polygon class="hex-shape" points="10,4 190,4 200,30 190,56 10,56 0,30" />
+          <text class="hex-text" x="100" y="30">Specifiche</text>
+        </svg>
+      </button>
+      
+      <button class="hex-button" onclick="toggleSection('datasheet', this)">
+        <svg viewBox="-10 0 220 60">
+          <polygon class="hex-shape" points="10,4 190,4 200,30 190,56 10,56 0,30" />
+          <text class="hex-text" x="100" y="30">Datasheet</text>
+        </svg>
+      </button>
+      
+      <button class="hex-button" onclick="toggleSection('manuali', this)">
+        <svg viewBox="-10 0 220 60">
+          <polygon class="hex-shape" points="10,4 190,4 200,30 190,56 10,56 0,30" />
+          <text class="hex-text" x="100" y="30">Manuali</text>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- SEZIONE AR E ESAGONO GRANDE -->
+    <section class="hex-section">
+      <div class="ar-container">
+        <model-viewer 
+          id="sens"
+          src="assets/3G-C2.glb" 
+          poster="assets/poster.png" 
+          ar 
+          ar-modes="webxr scene-viewer quick-look"
+          camera-controls
+          camera-orbit="1.031deg 86.34deg 7.905m" 
+          field-of-view="25.59deg"
+          touch-action="pan-y" 
+          alt="Design Weekend 2025"
+          animation-loop
+          ios-src="assets/3G-C2_new.usdz">
+          
+              <script>
+  const modelViewer = document.querySelector('model-viewer');
+  modelViewer.addEventListener('ar-button-press', () => {
+    const iosSrc = modelViewer.getAttribute('ios-src');
+    if (iosSrc && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      window.location.href = iosSrc; // Forza l'apertura del file .usdz
+    }
+  });
+</script>
+          <button slot="ar-button" class="ar-activation">
+            <svg viewBox="-10 0 220 60">
+              <polygon class="hex-shape" points="10,4 190,4 200,30 190,56 10,56 0,30"/>
+              <text class="hex-text" x="100" y="30">Activate AR</text>
+            </svg>
+          </button>
 
+          <button id="animate-button">
+            Explode
+          </button>
+
+        </model-viewer>
+        <svg class="big-hex" viewBox="0 0 200 200">
+          <polygon points="100,0 190,50 190,150 100,200 10,150 10,50" />
+        </svg>
+      </div>
+    </section>
+    
+    <!-- SEZIONE DESCRIZIONE -->
+    <div id="descrizione" class="content-section">
+      <h2 class="section-title">Descrizione</h2>
+      <p class="section-text">Lo SMART3G C2 consente una taratura in campo tramite l’apposito tastierino portatile di calibrazione STS/CKD+</p>
+      <p class="section-highlight">Gli SMART3G C2 sono certificati ATEX Categoria 2 per Zona 1.</p>
+    </div>
+    
+    <!-- SEZIONE SPECIFICHE -->
+    <div id="specifiche" class="content-section">
+      <h2 class="section-title">Specifiche</h2>
+      <ul class="hex-bullet section-text">
+        <li>Segnale 4-20mA</li>
+        <li>Scheda opzionale a 1 o 3 relè</li>
+        <li>Interfaccia opzionale RS485 per la comunicazione con protocollo Modbus</li>
+        <li>ATEX II 2G Ex db IIC T5 Gb (marcatura standard) (II2 GD con adattatore opzionale)</li>
+        <li>ATEX II 2G Ex db [ib] IIC T6 Gb per rivelatori con sicurezza intrinseca</li>
+        <li>Certificazioni SIL3 SW e SIL2 HW</li>
+        <li>Data logger esportabile con STS/CKD-OLED o STS/CSW+</li>
+      </ul>
+    </div>
+    
+    <!-- SEZIONE DATASHEET -->
+    <div id="datasheet" class="content-section">
+      <h2 class="section-title">Datasheet</h2>
+      <ul class="hex-bullet section-text">
+        <li>
+          <a class="custom-link" href="https://www.sensitron.it/MT/P/DS/_DS4737%20SMART3GC2%20CAT_IT.pdf" target="_blank" rel="noopener noreferrer">
+            Catalitico: Gas infiammabili (Metano, GPL, Butano, Propano…)
+          </a>
+        </li>
+        <li>
+          <a class="custom-link" href="https://www.sensitron.it/MT/P/DS/_DS4739%20SMART3GC2%20CELLA_IT.pdf" target="_blank" rel="noopener noreferrer">
+            Cella elettrochimica: Gas tossici (Ossigeno, Monossido di carbonio, Ammoniaca…)
+          </a>
+        </li>
+        <li>
+          <a class="custom-link" href="https://www.sensitron.it/MT/P/DS/_DS4740%20SMART3GC2%20CELLA%20S.I._IT.pdf" target="_blank" rel="noopener noreferrer">
+            Cella elettrochimica Sicurezza intrinseca: (Cloro, Anidride solforosa, Biossido di azoto)
+          </a>
+        </li>
+        <li>
+          <a class="custom-link" href="https://www.sensitron.it/MT/P/DS/_DS4738%20SMART3GC2%20IR_IT.pdf" target="_blank" rel="noopener noreferrer">
+            Infrarosso: Gas infiammabili, CO2, SF6, Gas refrigeranti
+          </a>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- SEZIONE MANUALI -->
+    <div id="manuali" class="content-section">
+      <h2 class="section-title">Manuali</h2>
+      <p class="section-text">
+        Per poter accedere ai manuali, devi 
+        <a class="custom-link" href="https://www.sensitron.it/area-riservata-accedi/" target="_blank" rel="noopener noreferrer">
+          autenticarti
+        </a>.
+      </p>
+    </div>
+    
+  </div><!-- /main-container -->
+  
+  <!-- SCRIPT -->
   <script>
+    // Funzione di toggle: se il pulsante cliccato è già attivo, lo deseleziona e nasconde la sezione.
+    function toggleSection(sectionId, btn) {
+      if (btn.classList.contains("active")) {
+        btn.classList.remove("active");
+        document.getElementById(sectionId).classList.remove("active");
+      } else {
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => section.classList.remove('active'));
+        const buttons = document.querySelectorAll('.hex-button');
+        buttons.forEach(button => button.classList.remove('active'));
+        btn.classList.add("active");
+        document.getElementById(sectionId).classList.add("active");
+      }
+    }
+  </script>
+ 
+<script> //SCRIPT PER ANIMAZIONI ANDROID
   const modelViewer = document.getElementById('sens');
   const animateButton = document.getElementById('animate-button'); // Correzione qui per ottenere il pulsante
 

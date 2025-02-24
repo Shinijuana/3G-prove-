@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <title>Sensitron AR</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    :not(:defined) > * {
+      display: none;
+    }
+
+     html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+    
+    model-viewer {
+      background-color: #fff;
+      overflow-x: hidden;
+      width: 100%;
+      height: 100vh;
+      object-fit: cover
+    }
+
+    #ar-button {
+      background-image: url(assets/ic_view_in_ar_new_googblue_48dp.png);
+      background-repeat: no-repeat;
+      background-size: 20px 20px;
+      background-position: 12px 50%;
+      background-color: #00d5ca;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      bottom: 132px;
+      padding: 0px 16px 0px 40px;
+      font-family: Roboto Regular, Helvetica Neue, sans-serif;
+      font-size: 14px;
+      color: #0076E7;
+      height: 36px;
+      line-height: 36px;
+      border-radius: 5px;
+      border: 1px solid #DADCE0;
+    }
+
+    #ar-button:active {
+      background-color: #E8EAED;
+    }
+
+    #ar-button:focus {
+      outline: none;
+    }
+
+    #ar-button:focus-visible {
+      outline: 1px solid #4285f4;
+    }
+
+    @keyframes circle {
+      from {
+        transform: translateX(-50%) rotate(0deg) translateX(50px) rotate(0deg);
+      }
+      to {
+        transform: translateX(-50%) rotate(360deg) translateX(50px) rotate(-360deg);
+      }
+    }
+
+    @keyframes elongate {
+      from {
+        transform: translateX(100px);
+      }
+      to {
+        transform: translateX(-100px);
+      }
+    }
+
+    model-viewer > #ar-prompt {
+      position: absolute;
+      left: 50%;
+      bottom: 175px;
+      animation: elongate 2s infinite ease-in-out alternate;
+      display: none;
+    }
+
+    model-viewer[ar-status="session-started"] > #ar-prompt {
+      display: block;
+    }
+
+    model-viewer > #ar-prompt > img {
+      animation: circle 4s linear infinite;
+    }
+
+    model-viewer > #ar-failure {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 175px;
+      display: none;
+    }
+
+    model-viewer[ar-tracking="not-tracking"] > #ar-failure {
+      display: block;
+    }
+
+    #animate-button {
+      background-image: url(assets/esploso.png);
+      background-repeat: no-repeat;
+      background-size: 20px 20px;
+      background-position: 12px 50%;
+      background-color: #0076E7;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      bottom: 80px;
+      padding: 0px 16px 0px 40px;
+      font-family: Roboto Regular, Helvetica Neue, sans-serif;
+      font-size: 14px;
+      color: #fff;
+      height: 36px;
+      line-height: 36px;
+      border-radius: 5px;
+      border: 1px solid #DADCE0;
+    }
+
+    #animate-button:active {
+      background-color: #00d5ca;
+    }
+    
+  </style>
+</head>
+<body>
+
+  <model-viewer 
+    id="sens"
+    src="full.glb" 
+    poster="assets/sensitron.jpg"
+    tone-mapping="neutral" 
+    shadow-intensity="1" 
+    ar 
+    ar-modes="webxr"
+    camera-controls 
+    touch-action="pan-y" 
+    alt="3G-C2 Sensor"
+    >
+    
+    <button slot="ar-button" id="ar-button">
+      View in your space
+    </button>
+
+    <div id="ar-prompt">
+      <img src="assets/hand.png" alt="Hand gesture to interact with AR">
+    </div>
+
+    <button id="ar-failure" role="alert" aria-live="assertive">
+      AR is not tracking!
+    </button>
+
+    <button id="animate-button">
+    Explode
+  </button> <!-- Messo fuori dal model-viewer per visibilità -->
+    
+  </model-viewer>
+  
+   
+
+  <script>
+  const modelViewer = document.getElementById('sens');
+  const animateButton = document.getElementById('animate-button'); // Correzione qui per ottenere il pulsante
+
+  let animationState = 'initial'; 
+  const pauseAtFrame1 = 120;
+  const pauseAtFrame2 = 237; 
+  const fps = 24;
+  const pauseTime1 = pauseAtFrame1 / fps; 
+  const pauseTime2 = pauseAtFrame2 / fps;
+  let isAnimating = false;
+  let isInAR = false;
+
+  const handleClick = () => {
+    console.log(`Click bottone rilevato, stato corrente: ${animationState}`);
+
+    if (animationState === 'initial') {
+      console.log('Stato: initial. Avvio animazione fino al frame 120.');
+      modelViewer.currentTime = 0; 
+      modelViewer.play();
+      isAnimating = true; 
+      animationState = 'playingTo120';
+
+      const checkFrame = () => {
+        console.log(`Verifica frame (playingTo120): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
+        modelViewer.updateFraming();
+
+        if (animationState === 'playingTo120' && modelViewer.currentTime >= pauseTime1) {
+          modelViewer.pause();
+          console.log('Animazione messa in pausa al frame 120.');
+          animationState = 'pausedAt120'; 
+          isAnimating = false; 
+        } else if (animationState === 'playingTo120') {
+          requestAnimationFrame(checkFrame); 
+        }
+      };
+      
+      requestAnimationFrame(checkFrame);
+    } else if (animationState === 'pausedAt120') {
+      console.log('Stato: pausedAt120. Riprendo animazione fino al frame 239.');
+      modelViewer.currentTime = pauseTime1;
+      modelViewer.play();
+      isAnimating = true;
+
+      const checkEnd = () => {
+        console.log(`Verifica fine (playingToEnd): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime2.toFixed(2)}`);
+        modelViewer.updateFraming();
+        
+        if (modelViewer.currentTime >= pauseTime2) {
+          modelViewer.pause();
+          console.log('Animazione finita e messa in pausa al frame 239.');
+          animationState = 'pausedAt239'; 
+          isAnimating = false; 
+        } else {
+          requestAnimationFrame(checkEnd); 
+        }
+      };
+
+      requestAnimationFrame(checkEnd);
+    } else if (animationState === 'pausedAt239') {
+      console.log('Stato: pausedAt239. Riprendo animazione dall\'inizio.');
+      modelViewer.currentTime = 0; 
+      modelViewer.play();
+      isAnimating = true;
+
+      const checkStart = () => {
+        console.log(`Verifica inizio (playingTo120): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
+        modelViewer.updateFraming();
+        
+        if (modelViewer.currentTime >= pauseTime1) {
+          modelViewer.pause();
+          console.log('Animazione messa in pausa al frame 120.');
+          animationState = 'pausedAt120'; 
+          isAnimating = false; 
+        } else {
+          requestAnimationFrame(checkStart); 
+        }
+      };
+
+      requestAnimationFrame(checkStart);
+    }
+  };
+
+  animateButton.addEventListener('click', () => {
+    if (!isAnimating) {
+      handleClick();
+    }
+  });
+
+  // Funzione per abbassare il modello 3D di 2.41828 metri
+  modelViewer.addEventListener('ar-status', (event) => {
+    if (event.detail.status === 'session-started') {
+      console.log('Entrato in modalità AR.');
+      isInAR = true;
+      modelViewer.pause();
+      isAnimating = false; 
+      
+      // Abbassa il modello di 2.41828 metri
+      const heightOffset = -2.41828; // Offset negativo per abbassare il modello
+      modelViewer.position.y += heightOffset; // Modifica la posizione Y
+    } else if (event.detail.status === 'not-presenting') {
+      console.log('Uscito dalla modalità AR.');
+      isInAR = false;
+    }
+  });
+
+  // Evento di fine animazione
+  modelViewer.addEventListener('finished', () => {
+    modelViewer.pause(); 
+    console.log('Animazione finita e messa in pausa (evento finished).');
+    animationState = 'pausedAt120';
+    isAnimating = false;
+  });
+
+</script>
+
+</body>
+</html>
